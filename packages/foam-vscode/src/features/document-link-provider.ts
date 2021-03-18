@@ -4,7 +4,7 @@ import { Foam, FoamWorkspace, NoteParser, uris } from 'foam-core';
 import { FoamFeature } from '../types';
 import { isNote, mdDocSelector } from '../utils';
 import { OPEN_COMMAND } from './utility-commands';
-import { toVsCodeRange } from '../utils/vsc-utils';
+import { toVsCodeRange, toVsCodeUri } from '../utils/vsc-utils';
 
 const linkDecoration = vscode.window.createTextEditorDecorationType({
   rangeBehavior: vscode.DecorationRangeBehavior.ClosedClosed,
@@ -89,14 +89,14 @@ export class LinkProvider implements vscode.DocumentLinkProvider {
     if (isNote(resource)) {
       return resource.links.map(link => {
         const target = this.workspace.resolveLink(resource, link);
-        const command = OPEN_COMMAND.asURI(target);
+        const command = OPEN_COMMAND.asURI(toVsCodeUri(target));
         const documentLink = new vscode.DocumentLink(
           toVsCodeRange(link.range),
           command
         );
         documentLink.tooltip = uris.isPlaceholder(target)
           ? `Create note for '${target.path}'`
-          : `Go to ${target.fsPath}`;
+          : `Go to ${uris.toFsPath(target)}`;
         return documentLink;
       });
     }
